@@ -1,6 +1,8 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js'
 import gsap from 'gsap'
+import {Pane} from 'tweakpane';
+const pane = new Pane();
 
 /**
  * Base
@@ -17,16 +19,100 @@ const sizes = {
 // Scene
 const scene = new THREE.Scene()
 
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000})
+const material = new THREE.MeshBasicMaterial({color: 0xff0000})
 // Object
-const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1, 2, 2, 2),
-    material
-)
+const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1, 2, 2, 2), material)
 scene.add(mesh)
+let nome = null
+const folderMesh = pane.addFolder({
+    title: nome || 'seja bem-vindo'
+})
+
+const folderPositionMesh = folderMesh.addFolder({title: 'position', expand: true})
+
+folderPositionMesh.addInput(mesh.position, "x", {
+    label: "x",
+    min: -20,
+    max: 20,
+    step: 0.1
+})
+
+folderPositionMesh.addInput(mesh.position, "y", {
+    label: "y",
+    min: -20,
+    max: 20,
+    step: 0.1
+})
+
+folderPositionMesh.addInput(mesh.position, "z", {
+    label: "z",
+    min: -20,
+    max: 20,
+    step: 0.1
+})
+
+// rotation
+const folderRotationMesh = folderMesh.addFolder({title: 'rotation', expand: true})
+
+const meshRotX = folderRotationMesh.addInput(mesh.rotation, "x", {
+    label: "axis-x",
+    min: -180,
+    max: 180,
+    step: 1
+})
+
+meshRotX.on('change', (ev) => {
+    mesh.rotation.x = ev.value * Math.PI / 180
+})
+
+const meshRotY = folderRotationMesh.addInput(mesh.rotation, "y", {
+    label: "axis-y",
+    min: -180,
+    max: 180,
+    step: 1
+})
+
+meshRotY.on('change', (ev) => {
+    mesh.rotation.y = ev.value * Math.PI / 180
+})
+
+const meshRotZ = folderRotationMesh.addInput(mesh.rotation, "z", {
+    label: "axis-z",
+    min: -180,
+    max: 180,
+    step: 1
+})
+
+meshRotZ.on('change', (ev) => {
+    mesh.rotation.z = ev.value * Math.PI / 180
+})
+
+folderMesh.addInput(mesh.material, "wireframe")
+folderMesh.addInput(mesh, "visible")
+const PARAMS = {
+    color: '#ff0000',
+    spin: () => {
+        gsap.to(mesh.rotation, {
+            duration: 1,
+            y: mesh.rotation.y + Math.PI * 2
+        })
+    },
+    nome: () => {
+        nome = prompt('qual seu nome?')
+    }
+};
+
+
+folderMesh.addInput(PARAMS, "color").on("change", (e) => {
+    material.color.set(new THREE.Color(e.value))
+})
+
+folderMesh.addButton({title: 'spin'}).on("click", PARAMS.spin)
+folderMesh.addButton({title: 'Setar nome'}).on("click", PARAMS.nome)
+
 
 // Camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height,0.1,100)
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 // camera.position.x = 2
 // camera.position.y = 2
 // camera.position.z = 2
@@ -37,9 +123,7 @@ camera.lookAt(mesh.position)
 scene.add(camera)
 
 // Renderer
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
-})
+const renderer = new THREE.WebGLRenderer({canvas: canvas})
 renderer.setSize(sizes.width, sizes.height)
 
 // Controls
@@ -49,50 +133,39 @@ controls.enableDamping = true
 
 let darkMode = true
 
-window.addEventListener('keypress',(event)=>{
-    if(event.code == 'KeyR'){
-        camera.position.set(0,0,5)
-        controls.target.set(0,0,0)
+window.addEventListener('keypress', (event) => {
+    if (event.code == 'KeyR') {
+        camera.position.set(0, 0, 5)
+        controls.target.set(0, 0, 0)
     }
 
-    if (event.code == 'KeyO'){
-        (darkMode) ? 
-            renderer.setClearColor( 0xffffff, 1): 
-            renderer.setClearColor( 0x000000, 1)
-        darkMode = !darkMode
+    if (event.code == 'KeyO') {
+        (darkMode) ? renderer.setClearColor(0xffffff, 1) : renderer.setClearColor(0x000000, 1)
+        darkMode = ! darkMode
     }
 })
 
-window.addEventListener('resize', () =>
-{
-    // Update sizes
+window.addEventListener('resize', () => { // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
-		// Update camera
+    // Update camera
     camera.aspect = sizes.width / sizes.height
-		camera.updateProjectionMatrix()
+    camera.updateProjectionMatrix()
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-window.addEventListener('dblclick', () =>
-{
-    if(!document.fullscreenElement)
-    {
+window.addEventListener('dblclick', () => {
+    if (!document.fullscreenElement) {
         canvas.requestFullscreen()
-    }
-    else
-    {
+    } else {
         document.exitFullscreen()
     }
 })
 
 
-
-
-const tick = () =>
-{
+function tick() {
     controls.update()
 
     // Render
