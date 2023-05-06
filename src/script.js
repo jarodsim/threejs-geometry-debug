@@ -17,13 +17,49 @@ const sizes = {
 // Scene
 const scene = new THREE.Scene()
 
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000})
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00,
+     wireframe: false})
 // Object
+// Create an empty BufferGeometry
+const geometry = new THREE.BufferGeometry()
+
+// // Create a Float32Array containing the vertices position (3 by 3)
+// const total = 50
+// const positionsArray = new Float32Array(total * 3* 3)
+
+// for (let index = 0; index < total * 3 * 3; index++) {
+//     positionsArray[index] = (Math.random() - 0.5) * 4
+    
+// }
+
+// // Create the attribute and name it 'position'
+// const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
+// geometry.setAttribute('position', positionsAttribute)
+
+// Define the position attribute
+const vertices = [
+    0, 0, 0,
+    1, 0, 0,
+    1, 1, 0,
+    0, 1, 0,
+    ];
+const positionAttribute = new THREE.Float32BufferAttribute(vertices, 3);
+geometry.setAttribute('position', positionAttribute);
+
+// Define the index attribute
+const indices = [
+    0, 1, 2,
+    2, 3, 0,
+    ];
+const indexAttribute = new THREE.Uint16BufferAttribute(indices, 1);
+geometry.setIndex(indexAttribute);
+
 const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1, 2, 2, 2),
+    geometry,
     material
 )
 scene.add(mesh)
+
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height,0.1,100)
@@ -89,7 +125,10 @@ window.addEventListener('dblclick', () =>
 })
 
 
-
+const geometry_torus = new THREE.TorusGeometry( 10, 3, 5, 20 ); 
+// const material_torus = new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: false } ); 
+// const torus = new THREE.Mesh( geometry_torus, material_torus );
+// scene.add( torus );
 
 const tick = () =>
 {
